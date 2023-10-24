@@ -11,12 +11,15 @@ build_image () {
     version=$2
     suffix=$3
 
+    # Creating a new builder for the multiplatform support
+    docker buildx create --name rubybuilder --use
+
     # Build and PUSH the image
     echo "Building the $env image"
-    docker build -t brian978/ruby-rails:"$version$suffix" "$DIR/$version/rails/$env"
+    docker buildx build --platform linux/amd64,linux/arm64 --push -t brian978/ruby-rails:"$version$suffix" "$DIR/$version/rails/$env"
 
-    echo "Pushing the $env image"
-    docker push brian978/ruby-rails:"$version$suffix"
+    # Cleanup the builder
+    docker buildx rm rubybuilder
 }
 
 if [ "$ENV" = 'dev' ]
