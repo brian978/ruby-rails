@@ -1,4 +1,4 @@
-name: PHP 8.0 docker image
+name: Ruby 3.2 docker image
 
 on:
   push:
