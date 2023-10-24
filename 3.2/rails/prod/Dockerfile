@@ -15,7 +15,7 @@ RUN adduser -s /bin/bash -h /var/www/app -D rails && chown -R rails:rails /var/w
 USER rails:rails
 
 # Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+ENTRYPOINT ["bin/docker-entrypoint"]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
