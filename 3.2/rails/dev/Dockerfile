@@ -1,0 +1,8 @@
+FROM brian978/ruby-rails:3.2
+
+# Set production environment
+ENV RAILS_ENV="development" \
+    BUNDLE_DEPLOYMENT="0" \
+    BUNDLE_PATH="vendor/bundle"
+
+RUN bundle config path "${BUNDLE_PATH}" --local
