@@ -8,7 +8,8 @@ ENV RAILS_ENV="production" \
 
 WORKDIR /var/www/app
 
-RUN apk add --no-cache bash \
+RUN apk update && apk add --no-cache \
+    bash \
     gcompat \
     ruby-dev \
     make \
@@ -18,7 +19,6 @@ RUN apk add --no-cache bash \
     tzdata \
     git \
     build-base \
-    libyaml-dev \
     yaml-dev \
     pkgconfig \
     mariadb-connector-c-dev \
