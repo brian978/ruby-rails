@@ -1,6 +1,7 @@
 name: Ruby 3.4 docker image
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
