@@ -19,6 +19,7 @@ RUN apk add --no-cache bash \
     git \
     build-base \
     libyaml-dev \
+    yaml-dev \
     pkgconfig \
     mariadb-connector-c-dev \
     mariadb-dev
