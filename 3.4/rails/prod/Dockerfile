@@ -8,7 +8,20 @@ ENV RAILS_ENV="production" \
 
 WORKDIR /var/www/app
 
-RUN apk add bash gcompat ruby-dev make gcc musl-dev mariadb-dev tzdata git
+RUN apk add --no-cache bash \
+    gcompat \
+    ruby-dev \
+    make \
+    gcc \
+    musl-dev \
+    mariadb-dev \
+    tzdata \
+    git \
+    build-base \
+    libyaml-dev \
+    pkgconfig \
+    mariadb-connector-c-dev \
+    mariadb-dev
 
 # Run and own only the runtime files as a non-root user for security
 RUN adduser -s /bin/bash -h /home/rails -D rails && chown -R rails:rails /var/www/app
