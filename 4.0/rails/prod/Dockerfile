@@ -1,4 +1,4 @@
-FROM ruby:4.0-alpine
+FROM ruby:4.0-slim
 
 # Set production environment
 ENV RAILS_ENV="production" \
@@ -8,24 +8,39 @@ ENV RAILS_ENV="production" \
 
 WORKDIR /var/www/app
 
-RUN apk update && apk add --no-cache \
-    bash \
-    gcompat \
-    ruby-dev \
-    make \
-    gcc \
-    musl-dev \
-    mariadb-dev \
-    tzdata \
-    git \
-    build-base \
-    yaml-dev \
-    pkgconfig \
-    mariadb-connector-c-dev \
-    mariadb-dev
+# Add Oracle MySQL 8.4 APT repository and install dependencies.
+# Uses the 2023 MySQL signing key (valid until 2027) with gpgv for
+# OpenPGP verification, since Debian Trixie's default sqv verifier
+# rejects the key's self-signature under its stricter expiry rules.
+# libmysqlclient-dev (Oracle) and libmariadb3 (MariaDB runtime) coexist:
+#   - libmysqlclient-dev conflicts with libmariadb-dev (same headers)
+#   - libmariadb3 is the runtime-only lib with no header conflict
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates gpg dirmngr gpgv \
+    && gpg --keyserver hkps://keyserver.ubuntu.com \
+           --recv-keys BCA43417C3B485DD128EC6D4B7B3B788A8D3785C \
+    && gpg --export BCA43417C3B485DD128EC6D4B7B3B788A8D3785C \
+         | gpg --dearmor -o /usr/share/keyrings/mysql.gpg \
+    && echo 'deb [signed-by=/usr/share/keyrings/mysql.gpg] https://repo.mysql.com/apt/debian/ bookworm mysql-8.4-lts' \
+         > /etc/apt/sources.list.d/mysql.list \
+    && echo 'Acquire::OpenPGP::Verification "gpgv";' \
+         > /etc/apt/apt.conf.d/99mysql-gpg \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        bash \
+        build-essential \
+        ruby-dev \
+        libmysqlclient-dev \
+        libmariadb3 \
+        libssl-dev \
+        tzdata \
+        git \
+        pkg-config \
+        libyaml-dev \
+    && apt-get purge -y --auto-remove gpg dirmngr \
+    && rm -rf /var/lib/apt/lists/*
 
 # Run and own only the runtime files as a non-root user for security
-RUN adduser -s /bin/bash -h /home/rails -D rails && chown -R rails:rails /var/www/app
+RUN useradd -m -s /bin/bash rails && chown -R rails:rails /var/www/app
 USER rails:rails
 
 # Entrypoint prepares the database.
