@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 DIR=$(pwd)
 VERSION=$1

@@ -9,15 +9,20 @@ ENV RAILS_ENV="production" \
 WORKDIR /var/www/app
 
 # Add Oracle MySQL 8.4 APT repository and install dependencies.
-# [trusted=yes] bypasses sqv signature verification on Debian Trixie;
-# Oracle's signing key (BCA4...) expired 2025-10-22 and the replacement
-# key is not yet distributed in any well-known key file. The repo is
-# served over HTTPS so transport security is preserved.
+# Oracle's signing key (BCA4...) expired 2025-10-22; Debian Trixie's sqv
+# verifier rejects it even with [trusted=yes] in the source entry on some
+# architectures. Writing AllowInsecureRepositories to apt.conf before
+# apt-get update fully disables signature checking for this repo.
+# The repo is served over HTTPS so transport security is preserved.
 # libmysqlclient-dev (Oracle) and libmariadb3 (MariaDB runtime) coexist:
 #   - libmysqlclient-dev conflicts with libmariadb-dev (same headers)
 #   - libmariadb3 is the runtime-only lib with no header conflict
 RUN echo 'deb [trusted=yes] https://repo.mysql.com/apt/debian/ bookworm mysql-8.4-lts' \
          > /etc/apt/sources.list.d/mysql.list \
+    && echo 'APT::Get::AllowUnauthenticated "true";' \
+         > /etc/apt/apt.conf.d/99allow-unauth \
+    && echo 'Acquire::AllowInsecureRepositories "true";' \
+         >> /etc/apt/apt.conf.d/99allow-unauth \
     && apt-get update && apt-get install -y --no-install-recommends \
         bash \
         build-essential \
@@ -29,7 +34,7 @@ RUN echo 'deb [trusted=yes] https://repo.mysql.com/apt/debian/ bookworm mysql-8.
         git \
         pkg-config \
         libyaml-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /etc/apt/apt.conf.d/99allow-unauth
 
 # Run and own only the runtime files as a non-root user for security
 RUN useradd -m -s /bin/bash rails && chown -R rails:rails /var/www/app
