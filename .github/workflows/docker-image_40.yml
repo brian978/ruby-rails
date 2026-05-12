@@ -1,0 +1,31 @@
+name: Ruby 4.0 docker image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '4.0/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '4.0/**'
+
+jobs:
+  build-80:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout code
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DK_HUB_USR }}
+          password: ${{ secrets.DK_HUB }}
+
+      - name: Build the Docker image for Ruby 4.0 with Ruby on Rails
+        run: |
+          make 40
+          make 40 env=dev
