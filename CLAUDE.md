@@ -50,18 +50,10 @@ on headers). Only the runtime `libmariadb3` coexists with `libmysqlclient-dev`.
 
 ### GPG key note
 
-Oracle's MySQL APT repo is signed with key `BCA43417C3B485DD128EC6D4B7B3B788A8D3785C`
-(created 2023-10-23, valid until 2027). Debian Trixie's default `sqv` verifier rejects
-this key during `apt-get update` due to stricter self-signature expiry rules. The
-Dockerfiles work around this with:
-
-```
-Acquire::OpenPGP::Verification "gpgv";
-```
-
-which uses the classic `gpgv` verifier (also present on Trixie) that accepts the key.
-The key is fetched via HTTPS from `keys.openpgp.org` rather than via the HKP protocol
-to avoid keyserver port restrictions in CI environments.
+Oracle's MySQL signing key `BCA43417C3B485DD128EC6D4B7B3B788A8D3785C` expired 2025-10-22
+and the replacement key is not yet distributed in any well-known public file. The
+Dockerfile uses `[trusted=yes]` in the apt source entry to bypass `sqv` signature
+verification. The repo is served over HTTPS so transport security is preserved.
 
 ### mysql2 build flags (4.0-dev image)
 

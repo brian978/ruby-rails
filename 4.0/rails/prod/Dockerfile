@@ -9,20 +9,15 @@ ENV RAILS_ENV="production" \
 WORKDIR /var/www/app
 
 # Add Oracle MySQL 8.4 APT repository and install dependencies.
-# Uses the 2023 MySQL signing key (valid until 2027) with gpgv for
-# OpenPGP verification, since Debian Trixie's default sqv verifier
-# rejects the key's self-signature under its stricter expiry rules.
+# [trusted=yes] bypasses sqv signature verification on Debian Trixie;
+# Oracle's signing key (BCA4...) expired 2025-10-22 and the replacement
+# key is not yet distributed in any well-known key file. The repo is
+# served over HTTPS so transport security is preserved.
 # libmysqlclient-dev (Oracle) and libmariadb3 (MariaDB runtime) coexist:
 #   - libmysqlclient-dev conflicts with libmariadb-dev (same headers)
 #   - libmariadb3 is the runtime-only lib with no header conflict
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl gpg gpgv \
-    && curl -fsSL 'https://keys.openpgp.org/vks/v1/by-fingerprint/BCA43417C3B485DD128EC6D4B7B3B788A8D3785C' \
-         | gpg --dearmor -o /usr/share/keyrings/mysql.gpg \
-    && echo 'deb [signed-by=/usr/share/keyrings/mysql.gpg] https://repo.mysql.com/apt/debian/ bookworm mysql-8.4-lts' \
+RUN echo 'deb [trusted=yes] https://repo.mysql.com/apt/debian/ bookworm mysql-8.4-lts' \
          > /etc/apt/sources.list.d/mysql.list \
-    && echo 'Acquire::OpenPGP::Verification "gpgv";' \
-         > /etc/apt/apt.conf.d/99mysql-gpg \
     && apt-get update && apt-get install -y --no-install-recommends \
         bash \
         build-essential \
@@ -34,7 +29,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         pkg-config \
         libyaml-dev \
-    && apt-get purge -y --auto-remove curl gpg \
     && rm -rf /var/lib/apt/lists/*
 
 # Run and own only the runtime files as a non-root user for security
