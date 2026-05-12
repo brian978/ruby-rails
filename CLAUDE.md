@@ -60,6 +60,8 @@ Acquire::OpenPGP::Verification "gpgv";
 ```
 
 which uses the classic `gpgv` verifier (also present on Trixie) that accepts the key.
+The key is fetched via HTTPS from `keys.openpgp.org` rather than via the HKP protocol
+to avoid keyserver port restrictions in CI environments.
 
 ### mysql2 build flags (4.0-dev image)
 

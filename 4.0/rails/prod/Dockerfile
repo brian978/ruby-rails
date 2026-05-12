@@ -16,10 +16,8 @@ WORKDIR /var/www/app
 #   - libmysqlclient-dev conflicts with libmariadb-dev (same headers)
 #   - libmariadb3 is the runtime-only lib with no header conflict
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates gpg dirmngr gpgv \
-    && gpg --keyserver hkps://keyserver.ubuntu.com \
-           --recv-keys BCA43417C3B485DD128EC6D4B7B3B788A8D3785C \
-    && gpg --export BCA43417C3B485DD128EC6D4B7B3B788A8D3785C \
+        ca-certificates curl gpg gpgv \
+    && curl -fsSL 'https://keys.openpgp.org/vks/v1/by-fingerprint/BCA43417C3B485DD128EC6D4B7B3B788A8D3785C' \
          | gpg --dearmor -o /usr/share/keyrings/mysql.gpg \
     && echo 'deb [signed-by=/usr/share/keyrings/mysql.gpg] https://repo.mysql.com/apt/debian/ bookworm mysql-8.4-lts' \
          > /etc/apt/sources.list.d/mysql.list \
@@ -36,7 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         pkg-config \
         libyaml-dev \
-    && apt-get purge -y --auto-remove gpg dirmngr \
+    && apt-get purge -y --auto-remove curl gpg \
     && rm -rf /var/lib/apt/lists/*
 
 # Run and own only the runtime files as a non-root user for security
